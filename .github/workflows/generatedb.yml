@@ -1,4 +1,4 @@
-name: 'Generate questionary responses DB'
+name: 'Obtain results'
 
 on:
   workflow_dispatch:
