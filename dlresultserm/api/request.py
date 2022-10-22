@@ -1,4 +1,5 @@
 import requests
+from dlresultserm.logger import logger
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N)',
@@ -9,6 +10,10 @@ def getResponse(url):
 
     response = requests.get(url, headers=headers)
     if(response.status_code != 200):
+        logger.debug(response.headers)
+        logger.debug(response.request.headers)
+        logger.error(response)
+        logger.error(response.content)
         raise ValueError
 
     return response.json()
