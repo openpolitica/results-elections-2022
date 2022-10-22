@@ -1,0 +1,53 @@
+name: 'Generate questionary responses DB'
+
+on:
+  workflow_dispatch:
+    branches:
+    - master
+    inputs:
+      env_type:
+        description: 'Environment type'
+        required: true
+        default: 'staging'
+
+jobs:
+  deploy:
+    name: 'Generate db'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Lint with flake8
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Execute script to generate db
+      run: |
+        python -m dlresultserm
+
+    - uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        automatic_release_tag: latest
+        prerelease: true
+        title: Results DB release
+        files: |
+          output/*.db
