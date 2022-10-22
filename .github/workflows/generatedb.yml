@@ -41,7 +41,7 @@ jobs:
 
     - name: Execute script to generate db
       run: |
-        python -m dlresultserm
+        python -m dlresultserm --log-level=debug
 
     - uses: marvinpinto/action-automatic-releases@latest
       with:
