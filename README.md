@@ -1,4 +1,4 @@
-# Python script for results from "Elecciones Regionales y Municipales 2022"
+# Script to obtain results from "Elecciones Regionales y Municipales 2022"
 
 ## Installation
 
