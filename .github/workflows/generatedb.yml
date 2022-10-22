@@ -34,6 +34,11 @@ jobs:
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+    - name: Test download
+      run: |
+        curl -vL -H "User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N)" -H "cache-control: no-cache" "https://api.resultadoserm2022.onpe.gob.pe/results/01/010000"
+
+
     - name: Lint with flake8
       run: |
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
