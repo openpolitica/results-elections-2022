@@ -1,0 +1,65 @@
+name: 'Obtain results (server)'
+
+on:
+  workflow_dispatch:
+    branches:
+    - master
+    inputs:
+      env_type:
+        description: 'Environment type'
+        required: true
+        default: 'staging'
+
+jobs:
+  deploy:
+    name: 'Generate db'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_KEY }}
+        name: id_rsa # optional
+        known_hosts: 'Generated-in-a-step-forward'
+        if_key_exists: fail 
+
+    - name: Adding Known Hosts
+      run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+    - name: rsync over ssh
+      run: rsync -av ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:regionals/results-elections-2022/
+
+    - name: Execute commands - create db
+      uses: appleboy/ssh-action@master
+      env:
+        DEFAULT_ENV_TYPE: 'staging'
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          cd regionals/results-elections-2022
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python -m dlresultserm --log-level=debug
+
+    - name: update local with ssh
+      run: rsync -av ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:regionals/results-elections-2022/ ./ 
+
+    - uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        automatic_release_tag: latest
+        prerelease: true
+        title: Results DB release
+        files: |
+          output/*.db
