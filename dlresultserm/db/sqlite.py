@@ -2,10 +2,11 @@ import sqlite3
 from pathlib import Path
 import os
 from dlresultserm.logger import logger, setLoggerLevel
+import json
 
 
 def adapt_dict(d):
-    return str(d)
+    return json.dumps(d)
 
 
 sqlite3.register_adapter(dict, adapt_dict)
