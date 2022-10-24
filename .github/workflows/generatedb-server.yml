@@ -2,13 +2,8 @@ name: 'Obtain results (server)'
 
 on:
   workflow_dispatch:
-    branches:
-    - master
-    inputs:
-      env_type:
-        description: 'Environment type'
-        required: true
-        default: 'staging'
+  schedule:
+    - cron: '0 0 * * *'  # every day at midnight
 
 jobs:
   deploy:
